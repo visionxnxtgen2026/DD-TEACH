@@ -48,25 +48,32 @@ if (process.env.NODE_ENV === "development") {
 
 /**
  * ==========================================
- * 🌐 CORS CONFIGURATION (PRODUCTION READY)
+ * 🌐 CORS CONFIGURATION (FIXED 🔥)
  * ==========================================
  */
+
+// ✅ Add your Vercel domains in .env
+// CLIENT_URL_ADMIN=https://your-admin.vercel.app
+// CLIENT_URL_USER=https://your-user.vercel.app
+
 const allowedOrigins = [
-  process.env.CLIENT_URL,
+  process.env.CLIENT_URL_ADMIN,
+  process.env.CLIENT_URL_USER,
   "http://localhost:5173",
   "http://localhost:5174",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // ✅ Allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
         console.log("🚫 CORS Blocked:", origin);
-        return callback(null, false);
+        return callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
@@ -142,19 +149,16 @@ const server = app.listen(PORT, () => {
  * ==========================================
  */
 
-// DB crash / promise error
 process.on("unhandledRejection", (err) => {
   console.error("❌ Unhandled Rejection:", err.message);
   server.close(() => process.exit(1));
 });
 
-// Code crash
 process.on("uncaughtException", (err) => {
   console.error("❌ Uncaught Exception:", err.message);
   process.exit(1);
 });
 
-// Graceful shutdown
 process.on("SIGINT", () => {
   console.log("🛑 Shutting down...");
   server.close(() => process.exit(0));
