@@ -183,6 +183,17 @@ export default function Content() {
     }
   };
 
+  // ========================
+  // 📂 OPEN FILE HANDLER
+  // ========================
+  const openFile = (fileName) => {
+    // If your backend already saves the path with /uploads/ (e.g. /uploads/file.pptx)
+    // and VITE_API_URL includes https://... we use backticks to join them safely.
+    // Make sure VITE_API_URL in your .env DOES NOT end with a slash if fileName starts with one!
+    const fileUrl = `${import.meta.env.VITE_API_URL}${fileName.startsWith('/') ? fileName : `/uploads/${fileName}`}`;
+    window.open(fileUrl, "_blank");
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-6">Content Management</h1>
@@ -307,9 +318,12 @@ export default function Content() {
                 <div className="space-y-2">
                   <p className="font-semibold text-blue-600">
                     📄 PPT: {c.pptUrl ? (
-                      <a href={`http://${import.meta.env.VITE_API_URL}${c.pptUrl}`} target="_blank" rel="noreferrer" className="underline ml-2">
-                        View/Download PPT
-                      </a>
+                      <button 
+                        onClick={() => openFile(c.pptUrl)}
+                        className="underline ml-2 hover:text-blue-800 transition-colors"
+                      >
+                        Open PPT
+                      </button>
                     ) : "Not available"}
                   </p>
                   <div className="text-sm">
