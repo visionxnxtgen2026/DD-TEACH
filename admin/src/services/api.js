@@ -1,10 +1,15 @@
-const BASE = "http://localhost:5000/api";
+/**
+ * api.js - Centralized API Service
+ */
+
+// 1. Configuration: Use Vite environment variables with a fallback for local dev
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE = `${API_URL}/api`;
 
 /**
- * ========================
- * 🔧 QUERY BUILDER (SAFE)
- * ========================
- * Converts { type: "college", stream: "AIML" } -> "?type=college&stream=AIML"
+ * 🔧 QUERY BUILDER
+ * Filters out empty/null/undefined values and returns a URL query string.
+ * Example: { category: "tech", page: 1, search: "" } -> "?category=tech&page=1"
  */
 const buildQuery = (params = {}) => {
   const filtered = Object.fromEntries(
@@ -16,9 +21,8 @@ const buildQuery = (params = {}) => {
 };
 
 /**
- * ========================
  * 🔥 COMMON REQUEST HANDLER
- * ========================
+ * Handles JSON vs FormData, Authorization headers, and 401 Unauthorized logic.
  */
 const request = async (url, options = {}) => {
   try {
@@ -28,34 +32,34 @@ const request = async (url, options = {}) => {
     const res = await fetch(url, {
       ...options,
       headers: {
+        // Automatically set JSON header unless sending FormData
         ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        // Attach Bearer token if it exists
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {}),
       },
     });
 
+    // Handle potential empty responses (like 204 No Content)
     let data;
-    try {
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
       data = await res.json();
-    } catch {
-      data = {};
+    } else {
+      data = await res.text();
     }
 
     if (!res.ok) {
+      // Auto-logout on token expiration/invalid token
       if (res.status === 401) {
         localStorage.removeItem("adminToken");
-        // Optional: window.location.href = "/login";
+        // Optional: Trigger a redirect or event here
+        // window.location.href = "/login"; 
       }
-      throw new Error(data.message || "API Error");
+      throw new Error(data.message || data || "API Error");
     }
 
-    /**
-     * 💡 Response Normalization
-     * Backend follows { success: true, data: [...] }
-     * We return the whole object so components can check for 'success' flag
-     */
     return data;
-
   } catch (err) {
     console.error("❌ API Error:", err.message);
     throw err;
@@ -63,14 +67,10 @@ const request = async (url, options = {}) => {
 };
 
 /**
- * ========================
  * 🚀 API METHODS
- * ========================
  */
 export const API = {
-  // ========================
   // 🔐 AUTHENTICATION
-  // ========================
   login: (data) =>
     request(`${BASE}/auth/login`, {
       method: "POST",
@@ -85,17 +85,11 @@ export const API = {
 
   getProfile: () => request(`${BASE}/auth/me`),
 
-  // ========================
   // 📊 DASHBOARD
-  // ========================
-  getDashboardStats: () =>
-    request(`${BASE}/dashboard/stats`),
+  getDashboardStats: () => request(`${BASE}/dashboard/stats`),
 
-  // ========================
   // 📚 SUBJECTS
-  // ========================
-  // Usage: API.getSubjects({ type: 'college', stream: 'AIML' })
-  getSubjects: (params = {}) =>
+  getSubjects: (params = {}) => 
     request(`${BASE}/subjects${buildQuery(params)}`),
 
   createSubject: (data) =>
@@ -115,11 +109,8 @@ export const API = {
       method: "DELETE",
     }),
 
-  // ========================
-  // 📘 UNITS (Only for School Path)
-  // ========================
-  // Usage: API.getUnits({ subject: subjectId })
-  getUnits: (params = {}) =>
+  // 📘 UNITS
+  getUnits: (params = {}) => 
     request(`${BASE}/units${buildQuery(params)}`),
 
   createUnit: (data) =>
@@ -139,11 +130,8 @@ export const API = {
       method: "DELETE",
     }),
 
-  // ========================
   // 📖 TOPICS
-  // ========================
-  // Usage: API.getTopics({ unit: unitId }) OR API.getTopics({ subject: subjectId })
-  getTopics: (params = {}) =>
+  getTopics: (params = {}) => 
     request(`${BASE}/topics${buildQuery(params)}`),
 
   createTopic: (data) =>
@@ -163,17 +151,14 @@ export const API = {
       method: "DELETE",
     }),
 
-  // ========================
   // 🎥 CONTENT (PPT & VIDEO)
-  // ========================
-  // Usage: API.getContent({ topic: topicId })
-  getContent: (params = {}) =>
+  getContent: (params = {}) => 
     request(`${BASE}/content${buildQuery(params)}`),
 
   createContent: (formData) =>
     request(`${BASE}/content`, {
       method: "POST",
-      body: formData, // FormData handles its own boundary
+      body: formData, // Browser handles boundary for FormData automatically
     }),
 
   updateContent: (id, data) =>
