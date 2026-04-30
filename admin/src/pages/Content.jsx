@@ -307,7 +307,7 @@ export default function Content() {
                 <div className="space-y-2">
                   <p className="font-semibold text-blue-600">
                     📄 PPT: {c.pptUrl ? (
-                      <a href={`${import.meta.env.VITE_API_URL}${c.pptUrl}`} target="_blank" rel="noreferrer" className="underline ml-2">
+                      <a href={`http://${import.meta.env.VITE_API_URL}${c.pptUrl}`} target="_blank" rel="noreferrer" className="underline ml-2">
                         View/Download PPT
                       </a>
                     ) : "Not available"}
