@@ -123,7 +123,7 @@ export default function Content() {
                       variant="outline"
                       onClick={() =>
                         window.open(
-                          `http://${import.meta.env.VITE_API_URL}${content.pptUrl}`,
+                          `${import.meta.env.VITE_API_URL}${content.pptUrl}`,
                           "_blank"
                         )
                       }
@@ -135,7 +135,7 @@ export default function Content() {
                       size="sm"
                       onClick={() =>
                         window.open(
-                          `http://${import.meta.env.VITE_API_URL}${content.pptUrl}`,
+                          `${import.meta.env.VITE_API_URL}${content.pptUrl}`,
                           "_blank"
                         )
                       }

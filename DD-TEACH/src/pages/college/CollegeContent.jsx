@@ -23,7 +23,7 @@ import Button from "../../components/ui/Button";
 import { API } from "../../utils/api";
 
 // 🔥 File server base URL
-const FILE_BASE = import.meta.env.VITE_API_BASE_URL || "http://${import.meta.env.VITE_API_URL}";
+const FILE_BASE = import.meta.env.VITE_API_BASE_URL || "${import.meta.env.VITE_API_URL}";
 
 export default function CollegeContent() {
   const { stream, sem, subject, topic } = useParams();
