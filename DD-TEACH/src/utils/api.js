@@ -4,7 +4,7 @@
 
 // 🌐 BASE URL: Use environment variable from Vite with a local fallback
 // We append /api here so we don't have to repeat it in every method.
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://${import.meta.env.VITE_API_URL}";
 const BASE_URL = `${API_URL}/api`;
 
 /**
